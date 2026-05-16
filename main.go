@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+const cavemanPrompt = "Respond terse like smart caveman. All technical substance stay. Only fluff die. Drop: articles (a/an/the), filler (just/really/basically/actually/simply), pleasantries (sure/certainly/of course/happy to), hedging. Fragments OK. Short synonyms (big not extensive, fix not implement). Pattern: [thing] [action] [reason]. [next step]. Code blocks unchanged. Errors quoted exact."
+
 type Provider interface {
 	Stream(ctx context.Context, system, prompt string, w io.Writer) error
 }
@@ -19,6 +21,7 @@ func main() {
 	var (
 		shellMode    bool
 		codeMode     bool
+		cavemanMode  bool
 		systemPrompt string
 		modelFlag    string
 		providerFlag string
@@ -28,6 +31,8 @@ func main() {
 	flag.BoolVar(&shellMode, "shell", false, "generate a shell command")
 	flag.BoolVar(&codeMode, "c", false, "output code only")
 	flag.BoolVar(&codeMode, "code", false, "output code only")
+	flag.BoolVar(&cavemanMode, "V", false, "caveman mode (terse output)")
+	flag.BoolVar(&cavemanMode, "caveman", false, "caveman mode (terse output)")
 	flag.StringVar(&systemPrompt, "S", "", "custom system prompt")
 	flag.StringVar(&systemPrompt, "system", "", "custom system prompt")
 	flag.StringVar(&modelFlag, "m", "", "model override")
@@ -40,6 +45,9 @@ func main() {
 	cfg, err := loadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "warning: %v\n", err)
+	}
+	if cfg.Caveman {
+		cavemanMode = true
 	}
 
 	provider := cfg.Provider
@@ -83,6 +91,12 @@ func main() {
 		system = "Output only the shell command with no explanation, no markdown, no code fences."
 	} else if codeMode {
 		system = "Output only the code with no explanation, no markdown fences."
+	} else if cavemanMode {
+		if system != "" {
+			system = cavemanPrompt + "\n\n" + system
+		} else {
+			system = cavemanPrompt
+		}
 	}
 
 	p := buildProvider(provider, cfg, model)
@@ -152,6 +166,7 @@ Examples:
 Flags:
   -s, --shell          Generate a shell command (offers to execute)
   -c, --code           Output code only (no markdown fences)
+  -V, --caveman        Terse caveman output (~75% fewer tokens)
   -S, --system TEXT    Custom system prompt
   -m, --model TEXT     Model override
   -p, --provider TEXT  Provider override (anthropic|openai)

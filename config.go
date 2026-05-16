@@ -14,6 +14,7 @@ import (
 type Config struct {
 	Provider  string         `toml:"provider"`
 	Model     string         `toml:"model"`
+	Caveman   bool           `toml:"caveman"`
 	Anthropic ProviderConfig `toml:"anthropic"`
 	OpenAI    ProviderConfig `toml:"openai"`
 }

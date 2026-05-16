@@ -22,6 +22,7 @@ echo "func foo() {}" | ask "explain this"
 cat file.txt | ask "summarize"
 ask --shell "list files sorted by size"
 ask --code "fibonacci in python"
+ask --caveman "explain what a mutex is"
 ```
 
 ## Flags
@@ -30,6 +31,7 @@ ask --code "fibonacci in python"
 |------|-------|-------------|
 | `--shell` | `-s` | Generate a shell command (prompts to execute) |
 | `--code` | `-c` | Output code only, no markdown fences |
+| `--caveman` | `-V` | Terse caveman output (~75% fewer tokens) |
 | `--system TEXT` | `-S` | Custom system prompt |
 | `--model TEXT` | `-m` | Model override |
 | `--provider TEXT` | `-p` | Provider override (`anthropic` or `openai`) |
@@ -37,6 +39,14 @@ ask --code "fibonacci in python"
 ## Config
 
 On first run, a setup wizard prompts for provider, API key, and default model. Config is saved to `~/.config/ask/config.toml`.
+
+To enable caveman mode by default, add `caveman = true` to your config:
+
+```toml
+provider = "anthropic"
+model    = "claude-opus-4-7"
+caveman  = true
+```
 
 You can also set keys via environment variables:
 
