@@ -54,3 +54,18 @@ You can also set keys via environment variables:
 export ANTHROPIC_API_KEY=sk-ant-...
 export OPENAI_API_KEY=sk-...
 ```
+
+## OpenAI-compatible providers
+
+Any OpenAI-compatible service (Ollama, LiteLLM, Azure OpenAI, local models, etc.) works by setting `base_url` in the `[openai]` section:
+
+```toml
+provider = "openai"
+model    = "llama3.2"
+
+[openai]
+api_key  = ""
+base_url = "http://localhost:11434/v1"
+```
+
+The setup wizard also prompts for a base URL when OpenAI is selected. Leave it blank to use `api.openai.com`.

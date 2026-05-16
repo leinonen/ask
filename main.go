@@ -139,7 +139,7 @@ func buildProvider(provider string, cfg Config, model string) Provider {
 	apiKey := cfg.resolveAPIKey(provider)
 	switch provider {
 	case "openai":
-		return newOpenAIProvider(apiKey, model)
+		return newOpenAIProvider(apiKey, model, cfg.OpenAI.BaseURL)
 	default:
 		return newAnthropicProvider(apiKey, model)
 	}

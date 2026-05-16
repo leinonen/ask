@@ -20,7 +20,8 @@ type Config struct {
 }
 
 type ProviderConfig struct {
-	APIKey string `toml:"api_key"`
+	APIKey  string `toml:"api_key"`
+	BaseURL string `toml:"base_url"`
 }
 
 var anthropicModels = []string{
@@ -84,7 +85,10 @@ func needsSetup(cfg Config, exists bool) bool {
 		return true
 	}
 	key := cfg.resolveAPIKey(provider)
-	return key == ""
+	if key == "" && !(provider == "openai" && cfg.OpenAI.BaseURL != "") {
+		return true
+	}
+	return false
 }
 
 func runSetupWizard(cfg *Config) error {
@@ -135,7 +139,19 @@ func runSetupWizard(cfg *Config) error {
 		}
 	}
 
-	// 3. Pick model
+	// 3. Base URL (OpenAI-compatible services only)
+	if cfg.Provider == "openai" {
+		fmt.Print("Base URL (leave blank for api.openai.com):\n> ")
+		baseURL := strings.TrimSpace(readLine(reader))
+		if baseURL != "" {
+			cfg.OpenAI.BaseURL = baseURL
+			fmt.Printf("→ %s\n\n", baseURL)
+		} else {
+			fmt.Println()
+		}
+	}
+
+	// 4. Pick model
 	models := anthropicModels
 	if cfg.Provider == "openai" {
 		models = openaiModels
@@ -183,7 +199,8 @@ func saveConfig(path string, cfg Config) error {
 	sb.WriteString("[anthropic]\n")
 	fmt.Fprintf(&sb, "api_key = %q\n\n", cfg.Anthropic.APIKey)
 	sb.WriteString("[openai]\n")
-	fmt.Fprintf(&sb, "api_key = %q\n", cfg.OpenAI.APIKey)
+	fmt.Fprintf(&sb, "api_key  = %q\n", cfg.OpenAI.APIKey)
+	fmt.Fprintf(&sb, "base_url = %q\n", cfg.OpenAI.BaseURL)
 
 	return os.WriteFile(path, []byte(sb.String()), 0600)
 }
