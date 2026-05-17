@@ -8,12 +8,21 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime/debug"
 	"strings"
 )
 
 const cavemanPrompt = "Respond terse like smart caveman. All technical substance stay. Only fluff die. Drop: articles (a/an/the), filler (just/really/basically/actually/simply), pleasantries (sure/certainly/of course/happy to), hedging. Fragments OK. Short synonyms (big not extensive, fix not implement). Pattern: [thing] [action] [reason]. [next step]. Code blocks unchanged. Errors quoted exact."
 
 var version = "dev"
+
+func init() {
+	if version == "dev" {
+		if bi, ok := debug.ReadBuildInfo(); ok && bi.Main.Version != "" && bi.Main.Version != "(devel)" {
+			version = bi.Main.Version
+		}
+	}
+}
 
 type Provider interface {
 	Stream(ctx context.Context, system, prompt string, w io.Writer) error
