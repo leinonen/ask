@@ -13,6 +13,8 @@ import (
 
 const cavemanPrompt = "Respond terse like smart caveman. All technical substance stay. Only fluff die. Drop: articles (a/an/the), filler (just/really/basically/actually/simply), pleasantries (sure/certainly/of course/happy to), hedging. Fragments OK. Short synonyms (big not extensive, fix not implement). Pattern: [thing] [action] [reason]. [next step]. Code blocks unchanged. Errors quoted exact."
 
+var version = "dev"
+
 type Provider interface {
 	Stream(ctx context.Context, system, prompt string, w io.Writer) error
 }
@@ -22,11 +24,14 @@ func main() {
 		shellMode    bool
 		codeMode     bool
 		cavemanMode  bool
+		versionFlag  bool
 		systemPrompt string
 		modelFlag    string
 		providerFlag string
 	)
 
+	flag.BoolVar(&versionFlag, "v", false, "print version")
+	flag.BoolVar(&versionFlag, "version", false, "print version")
 	flag.BoolVar(&shellMode, "s", false, "generate a shell command")
 	flag.BoolVar(&shellMode, "shell", false, "generate a shell command")
 	flag.BoolVar(&codeMode, "c", false, "output code only")
@@ -41,6 +46,11 @@ func main() {
 	flag.StringVar(&providerFlag, "provider", "", "provider override (anthropic|openai)")
 	flag.Usage = usage
 	flag.Parse()
+
+	if versionFlag {
+		fmt.Println(version)
+		return
+	}
 
 	cfg, err := loadConfig()
 	if err != nil {
@@ -170,6 +180,7 @@ Flags:
   -S, --system TEXT    Custom system prompt
   -m, --model TEXT     Model override
   -p, --provider TEXT  Provider override (anthropic|openai)
+  -v, --version        Print version
 
 Config: %s
 `, configPath())
